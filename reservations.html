@@ -81,6 +81,31 @@
       border: 2px solid #e0d8ce;
     }
 
+    /* SPOTS BANNER */
+    .spots-banner {
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 700;
+    }
+    .spots-banner[hidden] { display: none; }
+    .spots-banner h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.4rem;
+      margin-bottom: 0.25rem;
+    }
+    .spots-banner.open {
+      background: #EAF6E9;
+      border: 2px solid var(--green);
+      color: var(--navy);
+    }
+    .spots-banner.full {
+      background: #FFF3E0;
+      border: 2px solid var(--orange);
+      color: var(--navy);
+    }
+
     /* FOOTER */
     footer {
       background: var(--navy);
@@ -110,7 +135,8 @@
 
   <!-- FORM -->
   <div class="content">
-    <div class="embed-wrap">
+    <div id="spots-banner" class="spots-banner" hidden></div>
+    <div class="embed-wrap" id="form-wrap">
       <iframe class="airtable-embed" src="https://airtable.com/embed/app8YHLM4yub0RLu8/paguBn3Xu8xFgaBHA/form" frameborder="0" onmousewheel="" width="100%" height="533" style="background: transparent; border: 1px solid #ccc;"></iframe>
     </div>
   </div>
@@ -119,6 +145,29 @@
   <footer>
     <a href="index.html">← Back to SPARK! main site</a>
   </footer>
+
+  <script>
+    // Show today's van spots from /api/spots-left. If the number can't be
+    // loaded, show nothing and leave the form as-is.
+    fetch('/api/spots-left')
+      .then(r => r.json())
+      .then(({ spotsLeft }) => {
+        if (typeof spotsLeft !== 'number') return;
+        const banner = document.getElementById('spots-banner');
+        if (spotsLeft <= 0) {
+          banner.className = 'spots-banner full';
+          banner.innerHTML = '<h2>🚐 Rides for today are FULL</h2>' +
+            '<p>We don\'t have any extra seats for kids without a reservation. Check back tomorrow!</p>';
+          document.getElementById('form-wrap').hidden = true;
+        } else {
+          banner.className = 'spots-banner open';
+          banner.innerHTML = '<h2>🚐 ' + spotsLeft + ' spot' + (spotsLeft === 1 ? '' : 's') +
+            ' left in the van today</h2><p>Reserve yours below before they\'re gone.</p>';
+        }
+        banner.hidden = false;
+      })
+      .catch(() => {});
+  </script>
 
 </body>
 </html>
